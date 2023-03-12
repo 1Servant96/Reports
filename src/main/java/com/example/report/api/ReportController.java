@@ -9,7 +9,10 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/reports")
@@ -26,8 +29,9 @@ public class ReportController {
     }
 
     @GetMapping("/list")
-    public  ResponseEntity<?> getListReports(){
-        return ResponseEntity.ok(reportService.listReports());
+    public List<ReportResponse> getListReports() {
+//        return ResponseEntity.ok(reportService.listReports());
+       return reportService.getAllReports();
     }
 
     @PostMapping("/{complaintId}")
@@ -46,14 +50,15 @@ public class ReportController {
         return reportService.delete(reportId);
     }
 
-     @PutMapping("/{reportId}")
-    public ResponseEntity<?> updateReport(@PathVariable Long reportId, @RequestBody RequestReport requestReport) {
-        return reportService.update(reportId, requestReport);
-     }
-     @GetMapping("/statistics")
-    public ReportStatsDto statistics (){
-        return reportService.getReportStatistics();
-     }
+    @PutMapping("/{reportId}/{userId}")
+    public SimpleResponse updateReport(@PathVariable Long reportId, @PathVariable Long userId, @RequestBody RequestReport requestReport, @RequestParam(required = false) boolean like, @RequestParam(required = false) boolean dislike) {
+        return reportService.updateReport(reportId, userId, requestReport, like, dislike);
+    }
 
+
+    @GetMapping("/statistics")
+    public ReportStatsDto statistics() {
+        return reportService.getReportStatistics();
+    }
 
 }

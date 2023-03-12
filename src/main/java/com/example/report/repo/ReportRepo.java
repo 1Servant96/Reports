@@ -11,4 +11,5 @@ import java.util.List;
 public interface ReportRepo extends JpaRepository<Report,Long> {
     long countReportByReportStatus(ReportStatus reportStatus);
     List<Report> findReportByReportStatus(ReportStatus reportStatus);
+
 }

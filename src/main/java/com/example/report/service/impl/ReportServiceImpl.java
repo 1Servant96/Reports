@@ -3,10 +3,8 @@ package com.example.report.service.impl;
 import com.example.report.dto.ReportStatsDto;
 import com.example.report.dto.RequestReport;
 import com.example.report.dto.SimpleResponse;
-import com.example.report.entities.Publication;
-import com.example.report.entities.Report;
-import com.example.report.entities.ReportDate;
-import com.example.report.entities.ReportStatus;
+import com.example.report.dto.UserResponse;
+import com.example.report.entities.*;
 import com.example.report.repo.PublicationRepo;
 import com.example.report.repo.ReportDateRepo;
 import com.example.report.repo.ReportRepo;
@@ -20,9 +18,9 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.time.Duration;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -47,7 +45,7 @@ public class ReportServiceImpl implements ReportService {
         reportDate = reportDateRepo.save(reportDate);
 
         Report report = new Report();
-        report.setUserId(requestReport.getUserId());
+        report.setUserId(userRepository.findById(requestReport.getUserId()).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found!")));
         report.setReportDate(reportDate);
         report.setPublication(publication);
         reportRepo.save(report);
@@ -56,20 +54,22 @@ public class ReportServiceImpl implements ReportService {
     }
 
     @Override
-    public ResponseEntity<?> update(Long reportId, RequestReport requestReport) {
-        Report report = reportRepo.findById(reportId).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Report not found!"));
-        report.setUserId(requestReport.getUserId());
-        Publication publication = new Publication();
-        publication.setText(requestReport.getText());
-        report.setPublication(publication);
-        reportRepo.save(report);
-        return ResponseEntity.ok(requestReport);
-    }
-
-    @Override
     public ResponseEntity<?> listReports() {
         List<RequestReport> requestReportList = requestReportRepo.getList();
         return ResponseEntity.ok(requestReportList);
+    }
+
+    @Override
+    public List<ReportResponse> getAllReports() {
+        List<ReportResponse> getAll = new ArrayList<>();
+        for (Report report : reportRepo.findAll()) {
+            ReportResponse reportResponse = new ReportResponse();
+            reportResponse.setId(report.getId());
+            reportResponse.setText(report.getPublication().getText());
+            reportResponse.setUser(userRepository.getUserById(report.getUserId().getId()));
+            getAll.add(reportResponse);
+        }
+        return getAll;
     }
 
     @Override
@@ -101,10 +101,16 @@ public class ReportServiceImpl implements ReportService {
         ReportResponse reportResponse = new ReportResponse();
         Report report = reportRepo.findById(reportId).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Report not found!"));
         reportResponse.setReportStatus(report.getReportStatus().toString());
-        reportResponse.setUser(userRepository.findById(report.getUserId()).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found!")));
+        UserResponse userResponse = new UserResponse();
+        User user = report.getUserId();
+        userResponse.setId(user.getId());
+        userResponse.setName(user.getName());
+        userResponse.setImage(user.getImage());
+        userResponse.setEmail(user.getEmail());
+        reportResponse.setUser(userResponse);
         reportResponse.setText(report.getPublication().getText());
-        Duration duration = Duration.between(report.getReportDate().getCreateDate(), report.getReportDate().getFinishDate());
-        reportResponse.setTimeSolve(duration);
+//        Duration duration = Duration.between(report.getReportDate().getCreateDate(), report.getReportDate().getFinishDate());
+//        reportResponse.setTimeSolve(duration);
         return reportResponse;
     }
 
@@ -115,6 +121,62 @@ public class ReportServiceImpl implements ReportService {
         long completedCount = reportRepo.countReportByReportStatus(ReportStatus.RESOLVED);
 
         return new ReportStatsDto(uncheckedCount, pendingCount, completedCount);
+    }
+
+    @Override
+    public SimpleResponse updateReport(Long reportId, Long userId, RequestReport requestReport, boolean like, boolean dislike) {
+        Report report = reportRepo.findById(reportId).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Feedback not found!"));
+        Publication publication = new Publication();
+        User user = userRepository.findById(userId).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found!"));
+        if (user == report.getUserId()) {
+            if (requestReport.getText() != null) {
+                publication.setText(requestReport.getText());
+                report.setPublication(publication);
+            }
+
+            if (requestReport.getRating() != 0) {
+                report.setRating(requestReport.getRating());
+            }
+            if (requestReport.getImages() != null) {
+                report.setImages(requestReport.getImages());
+            }
+        }
+        if (like) {
+            liking(reportId, user.getId());
+        }
+        if (dislike) {
+            disLiking(reportId, user.getId());
+        }
+        reportRepo.save(report);
+        return new SimpleResponse("Report successfully updated!");
+    }
+
+    private void liking(Long reportId, Long userId) {
+        User user = userRepository.findById(userId).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found!"));
+        Report report = reportRepo.findById(reportId).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "not found!"));
+        if (report.getLikes().containsKey(user.getId())) {
+            report.setLike(report.getLike() - 1);
+            report.getLikes().remove(user.getId());
+            reportRepo.save(report);
+        } else {
+            report.getLikes().put(user.getId(), true);
+            report.setLike(report.getLike() + 1);
+            reportRepo.save(report);
+        }
+    }
+
+    private void disLiking(Long reportId, Long userId) {
+        User user = userRepository.findById(userId).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found!"));
+        Report report = reportRepo.findById(reportId).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "not found!"));
+        if (report.getDislikes().containsKey(user.getId())) {
+            report.setDislike(report.getDislike() - 1);
+            report.getDislikes().remove(user.getId());
+            reportRepo.save(report);
+        } else {
+            report.getDislikes().put(user.getId(), true);
+            report.setDislike(report.getDislike() + 1);
+            reportRepo.save(report);
+        }
     }
 
 }

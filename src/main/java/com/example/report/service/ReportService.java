@@ -6,9 +6,9 @@ import com.example.report.dto.SimpleResponse;
 import com.example.report.service.impl.ReportResponse;
 import org.springframework.http.ResponseEntity;
 
-public interface ReportService {
+import java.util.List;
 
-    ResponseEntity<?> update(Long reportId, RequestReport requestReport);
+public interface ReportService {
 
     ResponseEntity<?> save(RequestReport requestReport);
 
@@ -21,4 +21,8 @@ public interface ReportService {
     ReportResponse getById(Long reportId);
 
     ReportStatsDto getReportStatistics();
+
+    List<ReportResponse> getAllReports();
+
+    SimpleResponse updateReport(Long reportId, Long userId, RequestReport requestReport, boolean like, boolean dislike);
 }

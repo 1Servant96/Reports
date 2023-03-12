@@ -1,5 +1,6 @@
 package com.example.report.service.impl;
 
+import com.example.report.dto.UserResponse;
 import com.example.report.entities.User;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -18,6 +19,6 @@ public class ReportResponse {
     private Long id;
     private String text;
     private String reportStatus;
-    private User user;
+    private UserResponse user;
     private Duration timeSolve;
 }

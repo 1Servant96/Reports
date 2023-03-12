@@ -1,6 +1,7 @@
 package com.example.report.entities;
 
 import com.example.report.entities.Role;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
