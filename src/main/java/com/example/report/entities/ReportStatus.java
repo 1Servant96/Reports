@@ -3,11 +3,14 @@ package com.example.report.entities;
 
 public enum ReportStatus {
 
-    UNCHECKED,
+    IN_PROGRESS("In progress"),
 
-    PENDING,
+    RESOLVED("Resolved"),
 
-    COMPLETED,
+    IS_AWAITING_A_DECISION("Is awaiting a decision");
 
-    REJECTED
+    ReportStatus(String status) {
+
+    }
+
 }

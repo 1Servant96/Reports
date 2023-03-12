@@ -1,6 +1,6 @@
 package com.example.report.config.security;
 
-import com.example.report.config.jwt.JwtAuthenticationFilter;
+import com.example.report.config.jwt.JwtFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -12,13 +12,12 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
-@Configuration
 @EnableWebSecurity
+@Configuration
 @RequiredArgsConstructor
 @EnableGlobalMethodSecurity(prePostEnabled = true)
-public class SecurityConfiguration {
-
-    private final JwtAuthenticationFilter jwtAuthFilter;
+public class SecurityConfig {
+    private final JwtFilter jwtAuthFilter;
     private final AuthenticationProvider authenticationProvider;
 
     @Bean
@@ -29,7 +28,7 @@ public class SecurityConfiguration {
                 .authorizeHttpRequests()
                 .antMatchers("/api/auth/**")
                 .permitAll()
-                .antMatchers("/swagger-ui/index.html","api/public/**")
+                .antMatchers("/swagger-ui/index.html", "api/public/**")
                 .permitAll()
                 .anyRequest()
                 .permitAll()
@@ -41,6 +40,4 @@ public class SecurityConfiguration {
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }
-
-
 }

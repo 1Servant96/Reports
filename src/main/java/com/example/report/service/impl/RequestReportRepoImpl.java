@@ -6,7 +6,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Repository;
 
 import java.sql.*;
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -40,10 +39,10 @@ public class RequestReportRepoImpl implements RequestReportRepo {
 
                     while (rs.next()) {
                         RequestReport requestReport = new RequestReport();
-                        requestReport.setReportId(rs.getLong(1));
-                        requestReport.setUserId(rs.getLong(2));
-                        requestReport.setText(rs.getString(3));
-                        requestReport.setCreatedDate(rs.getDate(4).toLocalDate());
+//                        requestReport.setReportId(rs.getLong(1));
+                        requestReport.setUserId(rs.getLong(1));
+                        requestReport.setText(rs.getString(2));
+//                        requestReport.setCreatedDate(rs.getDate(3).toLocalDate());
                         requestReportList.add(requestReport);
                     }
 

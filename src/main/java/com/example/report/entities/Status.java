@@ -14,14 +14,15 @@ public class Status {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
+    private Long id;
+
     @OneToOne(optional = false)
     @JoinColumn(name = "post_id", nullable = false)
-
     private Post post;
+
     @OneToOne
     @JoinColumn(name = "user_id")
     private User user;
-
 
     private boolean status = false;
 

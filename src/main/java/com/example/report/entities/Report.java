@@ -23,7 +23,7 @@ public class Report {
     private ReportDate reportDate;
 
     @Enumerated(value = EnumType.STRING)
-    private ReportStatus reportStatus = ReportStatus.UNCHECKED;
+    private ReportStatus reportStatus = ReportStatus.IS_AWAITING_A_DECISION;
 
     private Long userId;
 }
